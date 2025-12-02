@@ -1,28 +1,26 @@
 {
-  description = "flake with FHS environment";
-
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
-  };
+  description = "A basic flake with a shell";
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+  inputs.flake-utils.url = "github:numtide/flake-utils";
 
   outputs =
     { nixpkgs, flake-utils, ... }:
     flake-utils.lib.eachDefaultSystem (
       system:
       let
-        pkgs = import nixpkgs { inherit system; };
-        fhs = pkgs.buildFHSEnv {
-          name = "advent-of-code";
-          # targetPkgs =
-          #   ps: with ps; [
-          #   ];
-          # multiPkgs = ps: with ps; [ ]; # 32-bit libs
-          runScript = "bash";
-        };
+        pkgs = nixpkgs.legacyPackages.${system};
       in
       {
-        devShells.default = fhs.env;
+        devShells.default = pkgs.mkShell {
+          packages = with pkgs; [
+            (pkgs.python3.withPackages (
+              python-pkgs: with python-pkgs; [
+                # select Python packages here
+                python-lsp-server
+              ]
+            ))
+          ];
+        };
       }
     );
 }
