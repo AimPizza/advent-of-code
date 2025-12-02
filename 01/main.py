@@ -1,30 +1,83 @@
-import re
-
-# put first element in one list
-# second element in another list
-# sort both lists
-# add on each iteration onto whole sum
-
-# read all numbers into two separate lists
-
-first_numbers = []
-second_numbers = []
-
-with open("input.txt", "r") as input_numbers:
-    for line in input_numbers:
-        both_numbers = re.findall('\d+', line)
-        first_numbers.append(int(both_numbers[0]))
-        second_numbers.append(int(both_numbers[1]))
+# journey of 01.12.2025
+# 16:48 - penalty of 10min
+# 17:21 - penalty of 10min
+# 17:38 - penalty of 10min
+# 18:51 - penalty of 10min
 
 
-# sort lists and add them up into one big sum
+from typing import Tuple
 
-final_sum = 0
 
-first_numbers.sort()
-second_numbers.sort()
+def handle_overshoot(raw_sum: int) -> int:
+    zeros = 0
+    pos = raw_sum
 
-for i in range(0, len(first_numbers)):
-    final_sum += abs(first_numbers[i] - second_numbers[i])
+    while pos < 0 or pos >= 100:
+        if pos == 0:
+            break
 
-print(final_sum)
+        if pos < 0:
+            pos += 100
+            zeros += 1
+
+        if pos >= 100:
+            pos -= 100
+            zeros += 1
+
+    return (pos, zeros)
+
+
+def get_rotation_amount(line: str) -> int:
+    direction = line[0]
+    abs_amount = int(line[1::])
+
+    if direction == "R":
+        amount = abs_amount
+    elif direction == "L":
+        amount = -1 * abs_amount
+
+    return amount
+
+
+def part_one():
+    print(" ---- part one ---- ")
+    with open("input.txt", "r") as directions:
+        current_pos = 50
+        basic_zeros = 0
+        zeros_incl_overturns = 0
+
+        for line in directions:
+            amount = get_rotation_amount(line)
+
+            sum = current_pos + amount
+            current_pos = sum % 100
+
+            if current_pos == 0:
+                basic_zeros += 1
+
+        print(f"solution no1: {basic_zeros}")
+
+
+def part_two():
+    print(" ---- part two ---- ")
+    with open("input.txt", "r") as directions:
+        current_pos = 50
+        zeros = 0
+
+        for line in directions:
+
+            amount = get_rotation_amount(line)
+
+            modifier = amount // abs(amount)  # 1 or -1
+            while amount != 0:
+                current_pos = (current_pos + modifier) % 100
+                amount -= modifier
+
+                if current_pos == 0:
+                    zeros += 1
+
+        print(f"solution no2: {zeros}")
+
+
+part_one()
+part_two()
